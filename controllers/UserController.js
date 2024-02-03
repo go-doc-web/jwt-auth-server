@@ -1,15 +1,15 @@
 const User = require("../models/user-model.js");
 const { controllerWraper } = require("../utils");
-const { registration } = require("../service/user-service.js");
+const { registration, getAllUsers } = require("../service/user-service.js");
 
 const getUsers = async (req, res, next) => {
-  const data = await User.find();
+  const data = await getAllUsers();
   res.status(200).json(data);
 };
 const registraition = async (req, res, next) => {
   const { email, password } = req.body;
-
-  res.json({ message: "enter your email" });
+  const data = await registration(email, password);
+  res.status(200).json(data);
 };
 const login = async (req, res, next) => {};
 const logout = async (req, res, next) => {};
