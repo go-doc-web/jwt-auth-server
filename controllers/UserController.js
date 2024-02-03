@@ -8,7 +8,6 @@ const getUsers = async (req, res, next) => {
 };
 const registraition = async (req, res, next) => {
   const { email, password } = req.body;
-  registration();
 
   res.json({ message: "enter your email" });
 };
