@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { registrationMailText } = require("../utils");
 const nodemailer = require("nodemailer");
 
 const sendActivationMail = async (to, link) => {
@@ -19,11 +20,9 @@ const sendActivationMail = async (to, link) => {
     await transporter.sendMail({
       from: process.env.SMTP_MAIL,
       to,
-      subject: "Nodemailer test",
-      text: "Registartion",
-      html: `<h1>Hello</h1>
-      <a href="${process.env.API_URL}">${link}</a>
-      `,
+      subject: "Важное уведомление",
+      text: "",
+      html: registrationMailText(link),
     });
   } catch (error) {
     console.error(error);

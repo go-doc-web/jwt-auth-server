@@ -9,11 +9,16 @@ const createUserDto = require("../dtos/user-dto.js");
 const SALT = 10;
 const apiUrl = process.env.API_URL;
 
-const getAllUsers = async () => {
+// Получить всех пользователей
+
+const getAllUsersService = async () => {
   const users = await User.find();
   return users;
 };
-const registration = async (email, password) => {
+
+// Регистрация
+
+const registrationService = async (email, password) => {
   // Проверяю есть ли в базе пользователь с таким email
   const candidate = await User.findOne({ email });
   // Если пользователь существует , прокидываю ошибку
@@ -33,8 +38,11 @@ const registration = async (email, password) => {
     activationLink,
   });
   // call sendActivationMail Функция для отпраки ссылки на почту пользователя
-  //!не работает разобраться позже
-  await sendActivationMail(email, `${apiUrl}/api/activate/${activationLink}`);
+
+  await sendActivationMail(
+    email,
+    `${process.env.API_URL}/api/activate/${activationLink}`
+  );
 
   const userDto = createUserDto(newUser);
 
@@ -49,8 +57,21 @@ const registration = async (email, password) => {
     user: userDto,
   };
 };
+// Функция активации
+
+const activateSevice = async (activationLink) => {
+  const user = await User.findOne({ activationLink });
+  if (!user) {
+    throw new Error("Шncorrect activation link");
+  }
+  console.log(user.isActivated);
+  user.isActivated = true;
+  console.log(user.isActivated);
+  await user.save();
+};
 
 module.exports = {
-  registration,
-  getAllUsers,
+  registrationService,
+  getAllUsersService,
+  activateSevice,
 };
