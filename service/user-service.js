@@ -2,7 +2,12 @@ require("dotenv").config();
 const User = require("../models/user-model.js");
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
-const { sendActivationMail } = "../service/mail-service.js";
+const { sendActivationMail } = require("./mail-service.js");
+const { generatedToken, saveRefreshToken } = require("./token-service.js");
+const createUserDto = require("../dtos/user-dto.js");
+
+const SALT = 10;
+const apiUrl = process.env.API_URL;
 
 const getAllUsers = async () => {
   const users = await User.find();
@@ -17,7 +22,7 @@ const registration = async (email, password) => {
   }
   // Если Пользователь с таким Email отсутствует, создаю нового
   // Использую bcrypt для хеширования пароля
-  const SALT = 10;
+
   const hashPassword = await bcrypt.hash(password, SALT);
   // uuid.v4() для создания рандомной строки ссылки активации
   const activationLink = uuid.v4();
@@ -28,9 +33,21 @@ const registration = async (email, password) => {
     activationLink,
   });
   // call sendActivationMail Функция для отпраки ссылки на почту пользователя
-  await sendActivationMail(email, activationLink);
+  //!не работает разобраться позже
+  await sendActivationMail(email, `${apiUrl}/api/activate/${activationLink}`);
 
-  return newUser;
+  const userDto = createUserDto(newUser);
+
+  // Генерируем токены, в качестве payload в функцию generatedToken передаем dto,
+  // измененный щбьект модели пользователя, где убраны ненужные поля
+  const { accessToken, refreshToken } = generatedToken(userDto);
+
+  await saveRefreshToken(userDto.id, refreshToken);
+  return {
+    accessToken,
+    refreshToken,
+    user: userDto,
+  };
 };
 
 module.exports = {

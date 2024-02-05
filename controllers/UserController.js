@@ -9,6 +9,12 @@ const getUsers = async (req, res, next) => {
 const registraition = async (req, res, next) => {
   const { email, password } = req.body;
   const data = await registration(email, password);
+  // Отправляем токен в куках httpOnly: true обязателен, если протокол секур - говорим
+  // об єтом в опциях
+  res.cookie("refreshToken", data.refreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
   res.status(200).json(data);
 };
 const login = async (req, res, next) => {};
