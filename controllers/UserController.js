@@ -7,12 +7,20 @@ const {
   activateSevice,
 } = require("../service/user-service.js");
 
+const { validateUserJoi } = require("../helpers");
+
 const getUsers = async (req, res, next) => {
   const data = await getAllUsersService();
   res.status(200).json(data);
 };
 const registraition = async (req, res, next) => {
+  const { error } = validateUserJoi(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
   const { email, password } = req.body;
+
   const data = await registrationService(email, password);
   // Отправляем токен в куках httpOnly: true обязателен, если протокол секур - говорим
   // об єтом в опциях
