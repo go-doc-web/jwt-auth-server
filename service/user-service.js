@@ -2,6 +2,7 @@ require("dotenv").config();
 const User = require("../models/user-model.js");
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
+const { HttpError } = require("../helpers");
 const { sendActivationMail } = require("./mail-service.js");
 const { generatedToken, saveRefreshToken } = require("./token-service.js");
 const createUserDto = require("../dtos/user-dto.js");
@@ -23,7 +24,7 @@ const registrationService = async (email, password) => {
   const candidate = await User.findOne({ email });
   // Если пользователь существует , прокидываю ошибку
   if (candidate) {
-    throw new Error(`User with this ${email} already exists`);
+    throw HttpError(400, `User with this ${email} already exists`);
   }
   // Если Пользователь с таким Email отсутствует, создаю нового
   // Использую bcrypt для хеширования пароля
@@ -62,11 +63,11 @@ const registrationService = async (email, password) => {
 const activateSevice = async (activationLink) => {
   const user = await User.findOne({ activationLink });
   if (!user) {
-    throw new Error("Шncorrect activation link");
+    throw HttpError(400, "Uncorrect activation link");
   }
-  console.log(user.isActivated);
+
   user.isActivated = true;
-  console.log(user.isActivated);
+
   await user.save();
 };
 

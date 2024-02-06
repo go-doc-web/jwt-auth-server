@@ -5,6 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const router = require("./router/index.js");
+const { HttpError } = require("./helpers");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
