@@ -71,8 +71,30 @@ const activateSevice = async (activationLink) => {
   await user.save();
 };
 
+const loginService = async (email, password) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw HttpError(400, "Erorr authorization");
+  }
+
+  const isPassEquals = await bcrypt.compare(password, user.password);
+  if (!isPassEquals) {
+    throw HttpError(400, "Erorr authorization");
+  }
+  const userDto = createUserDto(user);
+  const { accessToken, refreshToken } = generatedToken(userDto);
+
+  await saveRefreshToken(userDto.id, refreshToken);
+  return {
+    accessToken,
+    refreshToken,
+    user: userDto,
+  };
+};
+
 module.exports = {
   registrationService,
   getAllUsersService,
   activateSevice,
+  loginService,
 };

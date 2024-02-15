@@ -1,18 +1,25 @@
 require("dotenv").config();
 const User = require("../models/user-model.js");
+
 const { controllerWraper } = require("../utils");
 const {
   registrationService,
   getAllUsersService,
   activateSevice,
+  loginService,
 } = require("../service/user-service.js");
 
 const { validateUserJoi } = require("../helpers");
+
+// GET Users
 
 const getUsers = async (req, res, next) => {
   const data = await getAllUsersService();
   res.status(200).json(data);
 };
+
+// Registration
+
 const registraition = async (req, res, next) => {
   const { error } = validateUserJoi(req.body);
   if (error) {
@@ -30,8 +37,26 @@ const registraition = async (req, res, next) => {
   });
   res.status(200).json(data);
 };
-const login = async (req, res, next) => {};
-const logout = async (req, res, next) => {};
+
+// Login
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const data = await loginService(email, password);
+  res.cookie("refreshToken", data.refreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
+  res.status(200).json(data);
+};
+
+// Logout
+
+const logout = async (req, res, next) => {
+  const { refreshToken } = req.cookies;
+  res.send({ message: "logot", token: refreshToken });
+};
 
 const activate = async (req, res, next) => {
   const activationLink = req.params.link;
