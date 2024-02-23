@@ -16,14 +16,20 @@ const saveRefreshToken = async (userId, refreshToken) => {
   const refreshTokenData = await tokenModel.findOne({ user: userId });
   if (refreshTokenData) {
     refreshTokenData.refreshToken = refreshToken;
-    refreshTokenData.save();
+    return refreshTokenData.save();
   }
 
   const token = await tokenModel.create({ user: userId, refreshToken });
   return token;
 };
 
+const removeToken = async (refreshToken) => {
+  const tokenData = await tokenModel.deleteOne({ refreshToken });
+  return tokenData;
+};
+
 module.exports = {
   generatedToken,
   saveRefreshToken,
+  removeToken,
 };

@@ -7,6 +7,7 @@ const {
   getAllUsersService,
   activateSevice,
   loginService,
+  logoutService,
 } = require("../service/user-service.js");
 
 const { validateUserJoi } = require("../helpers");
@@ -43,19 +44,21 @@ const registraition = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const data = await loginService(email, password);
-  res.cookie("refreshToken", data.refreshToken, {
+  const userData = await loginService(email, password);
+  res.cookie("refreshToken", userData.refreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
   });
-  res.status(200).json(data);
+  res.status(200).json(userData);
 };
 
 // Logout
 
 const logout = async (req, res, next) => {
   const { refreshToken } = req.cookies;
-  res.send({ message: "logot", token: refreshToken });
+  const token = await logoutService(refreshToken);
+  res.clearCookie("refreshToken");
+  return res.status(200).json(token);
 };
 
 const activate = async (req, res, next) => {

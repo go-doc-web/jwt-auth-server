@@ -4,7 +4,11 @@ const bcrypt = require("bcrypt");
 const uuid = require("uuid");
 const { HttpError } = require("../helpers");
 const { sendActivationMail } = require("./mail-service.js");
-const { generatedToken, saveRefreshToken } = require("./token-service.js");
+const {
+  generatedToken,
+  saveRefreshToken,
+  removeToken,
+} = require("./token-service.js");
 const createUserDto = require("../dtos/user-dto.js");
 
 const SALT = 10;
@@ -82,14 +86,19 @@ const loginService = async (email, password) => {
     throw HttpError(400, "Erorr authorization");
   }
   const userDto = createUserDto(user);
-  const { accessToken, refreshToken } = generatedToken(userDto);
 
-  await saveRefreshToken(userDto.id, refreshToken);
+  const tokens = generatedToken({ ...userDto });
+
+  await saveRefreshToken(userDto.id, tokens.refreshToken);
   return {
-    accessToken,
-    refreshToken,
+    ...tokens,
     user: userDto,
   };
+};
+
+const logoutService = async (refreshToken) => {
+  const token = await removeToken(refreshToken);
+  return token;
 };
 
 module.exports = {
@@ -97,4 +106,5 @@ module.exports = {
   getAllUsersService,
   activateSevice,
   loginService,
+  logoutService,
 };
