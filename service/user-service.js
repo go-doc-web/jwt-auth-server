@@ -8,6 +8,9 @@ const {
   generatedToken,
   saveRefreshToken,
   removeToken,
+  validateAccessToken,
+  validateRefreshToken,
+  findToken,
 } = require("./token-service.js");
 const createUserDto = require("../dtos/user-dto.js");
 
@@ -100,6 +103,25 @@ const logoutService = async (refreshToken) => {
   const token = await removeToken(refreshToken);
   return token;
 };
+const refreshService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw HttpError(401, "User dont fined");
+  }
+  const userData = validateRefreshToken(refreshToken);
+  const tokenFromDB = await findToken(refreshToken);
+
+  if (!userData || !tokenFromDB) {
+    throw HttpError(401, "User dont fined");
+  }
+  const user = await User.findById(userData.id);
+  const userDto = createUserDto(user);
+  const tokens = generatedToken({ ...userDto });
+  await saveRefreshToken(userDto.id, tokens.refreshToken);
+  return {
+    ...tokens,
+    user: userDto,
+  };
+};
 
 module.exports = {
   registrationService,
@@ -107,4 +129,5 @@ module.exports = {
   activateSevice,
   loginService,
   logoutService,
+  refreshService,
 };
