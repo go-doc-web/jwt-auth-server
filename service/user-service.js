@@ -20,8 +20,10 @@ const apiUrl = process.env.API_URL;
 // Получить всех пользователей
 
 const getAllUsersService = async () => {
-  const users = await User.find();
-  return users;
+  try {
+    const users = await User.find();
+    return users;
+  } catch (error) {}
 };
 
 // Регистрация
@@ -105,10 +107,12 @@ const logoutService = async (refreshToken) => {
 };
 const refreshService = async (refreshToken) => {
   if (!refreshToken) {
-    throw HttpError(401, "User dont fined");
+    throw HttpError(401, "User mathetr fuka dont fined");
   }
   const userData = validateRefreshToken(refreshToken);
   const tokenFromDB = await findToken(refreshToken);
+  console.log(userData);
+  console.log(tokenFromDB);
 
   if (!userData || !tokenFromDB) {
     throw HttpError(401, "User dont fined");

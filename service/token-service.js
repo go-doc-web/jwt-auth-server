@@ -6,7 +6,7 @@ const accessSecret = process.env.JWT_ACCESS_SECRET;
 const refreshSecret = process.env.JWT_REFRESH_SECRET;
 
 const generatedToken = (payload) => {
-  const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "15m" });
+  const accessToken = jwt.sign(payload, accessSecret, { expiresIn: "60s" });
   const refreshToken = jwt.sign(payload, refreshSecret, { expiresIn: "30d" });
 
   return { accessToken, refreshToken };
@@ -27,15 +27,15 @@ const removeToken = async (refreshToken) => {
   const tokenData = await tokenModel.deleteOne({ refreshToken });
   return tokenData;
 };
-const validateAccessToken = async (token) => {
+const validateAccessToken = (token) => {
   try {
-    const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const userData = jwt.verify(token, accessSecret);
     return userData;
   } catch (error) {
     return null;
   }
 };
-const validateRefreshToken = async (token) => {
+const validateRefreshToken = (token) => {
   try {
     const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     return userData;
@@ -44,8 +44,9 @@ const validateRefreshToken = async (token) => {
   }
 };
 
-const findToken = async (token) => {
-  const tokenData = await tokenModel.findOne({ token });
+const findToken = async (refreshToken) => {
+  const tokenData = await tokenModel.findOne({ refreshToken });
+
   return tokenData;
 };
 

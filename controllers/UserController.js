@@ -70,7 +70,9 @@ const activate = async (req, res, next) => {
 };
 const refresh = async (req, res, next) => {
   const { refreshToken } = req.cookies;
+
   const userData = await refreshService(refreshToken);
+
   res.cookie("refreshToken", userData.refreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
